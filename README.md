@@ -1,3 +1,4 @@
+![](https://images5.alphacoders.com/119/thumb-1920-1198137.jpg)
 # 🤖 Bot Notifikasi Gempa Discord
 
 Bot otomatis 24/7 yang memantau gempa dari **USGS** (global) & **BMKG** (Indonesia), lalu mengirim notifikasi real-time ke channel Discord.
@@ -21,7 +22,7 @@ Bot otomatis 24/7 yang memantau gempa dari **USGS** (global) & **BMKG** (Indones
 
 ### 1. Clone / Download
 ```bash
-cd bot-gempa
+cd getoo-earthquake
 ```
 
 ### 2. Install Dependencies
@@ -149,11 +150,3 @@ CMD ["python", "main.py"]
 ## 📊 Logging
 
 Log tersimpan di `logs/bot-YYYY-MM-DD.log` (rotasi harian).
-
-## 📄 Lisensi
-
-MIT
-
----
-
-**Dibuat dengan ❤️ untuk komunitas Indonesia**
