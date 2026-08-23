@@ -11,8 +11,7 @@ import discord
 from api.gempa import fetch_all
 from api.peta import generate_map
 from database.queries import (
-    get_all_active_servers, is_earthquake_sent, log_earthquake,
-    is_tsunami_sent, log_tsunami
+    get_all_active_servers, is_earthquake_sent, log_earthquake
 )
 from lib.embed import build_earthquake_embed, humanize_time
 

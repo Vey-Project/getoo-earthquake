@@ -20,10 +20,18 @@ async def setup_setchannel_command(tree: app_commands.CommandTree, guild=None):
         description="📢 Atur channel tujuan notifikasi gempa",
         guild=guild
     )
+    @app_commands.default_permissions(manage_guild=True)
     @app_commands.describe(channel="Channel untuk notifikasi (contoh: #gempa-alert)")
     async def setchannel_slash(interaction: discord.Interaction, channel: discord.TextChannel):
         if not interaction.guild:
             await interaction.response.send_message("❌ Perintah ini hanya bisa di server.", ephemeral=True)
+            return
+
+        if not interaction.permissions.manage_guild:
+            await interaction.response.send_message(
+                "❌ Perintah ini khusus admin (butuh izin **Manage Server**).",
+                ephemeral=True
+            )
             return
 
         # Cek permission

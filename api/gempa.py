@@ -1,6 +1,7 @@
 """
 api/gempa.py - Fetch data gempa dari USGS dan BMKG
 """
+import asyncio
 import logging
 import aiohttp
 
@@ -83,7 +84,8 @@ async def fetch_bmkg(session: aiohttp.ClientSession) -> list:
 
 
 async def fetch_all(session: aiohttp.ClientSession) -> list:
-    """Fetch dari semua sumber"""
-    usgs = await fetch_usgs(session)
-    bmkg = await fetch_bmkg(session)
+    """Fetch dari semua sumber (paralel)"""
+    usgs, bmkg = await asyncio.gather(
+        fetch_usgs(session), fetch_bmkg(session)
+    )
     return usgs + bmkg

@@ -2,7 +2,9 @@
 api/peta.py - Generate peta lokasi gempa menggunakan Mapbox Static API
 """
 import logging
+import uuid
 from typing import Optional
+
 import aiohttp
 
 from config import MAPBOX_TOKEN
@@ -12,7 +14,7 @@ logger = logging.getLogger(__name__)
 MAPBOX_STATIC_URL = "https://api.mapbox.com/styles/v1/mapbox/streets-v12/static"
 
 
-async def generate_map(latitude: float, longitude: float, filename: str = "peta.png",
+async def generate_map(latitude: float, longitude: float,
                        zoom: int = 6, width: int = 800, height: int = 500) -> Optional[str]:
     """
     Generate peta lokasi gempa menggunakan Mapbox Static Images API.
@@ -33,6 +35,8 @@ async def generate_map(latitude: float, longitude: float, filename: str = "peta.
                     logger.warning("Mapbox return status %s", resp.status)
                     return None
                 data = await resp.read()
+                # Nama unik: scheduler job & /peta bisa jalan bersamaan
+                filename = f"peta_{uuid.uuid4().hex[:8]}.png"
                 with open(filename, "wb") as f:
                     f.write(data)
                 logger.info("Peta berhasil digenerate: %s", filename)

@@ -35,11 +35,11 @@ def humanize_time(ts: Optional[str]) -> str:
     """Format waktu ke WIB (UTC+7)"""
     try:
         if isinstance(ts, (int, float)):
-            dt = datetime.datetime.utcfromtimestamp(ts / 1000)
+            dt = datetime.datetime.fromtimestamp(ts / 1000, tz=datetime.timezone.utc)
         else:
-            # BMKG format: "11-Aug-26 14:32:10 WIB" atau ISO
+            # BMKG format: "11-Aug-26 14:32:10 WIB" — sudah WIB, tampilkan apa adanya
             if ts and "WIB" in ts:
-                return ts.replace("WIB", "WIB")
+                return ts
             dt = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
         dt = dt + datetime.timedelta(hours=7)  # UTC → WIB
         return dt.strftime("%d-%b-%Y %H:%M:%S WIB")
@@ -56,7 +56,7 @@ def build_earthquake_embed(eq: dict) -> discord.Embed:
         title=f"{format_magnitudo_badge(mag)} GEMPA BUMI MAGNITUDO {mag}",
         description=f"🔔 **Sumber: {source}**",
         color=magnitudo_color(mag),
-        timestamp=datetime.datetime.utcnow()
+        timestamp=datetime.datetime.now(datetime.timezone.utc)
     )
 
     embed.add_field(name="📍 Lokasi", value=eq.get("location", "Unknown"), inline=False)

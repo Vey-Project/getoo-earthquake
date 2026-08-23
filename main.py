@@ -31,11 +31,9 @@ class EarthquakeBot(discord.Client):
 
     def __init__(self):
         intents = discord.Intents.default()
-        intents.message_content = True
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
         self.scheduler = AsyncIOScheduler()
-        self.guild = None
 
     async def setup_hook(self):
         """Setup cepat saat bot siap — start cepat, command sync menyusul"""
@@ -52,16 +50,6 @@ class EarthquakeBot(discord.Client):
         """Daftar & sync slash commands secara async di background.
         Dipanggil dari on_ready supaya bot sudah online dulu.
         """
-        from commands.help import setup_help_command
-        from commands.gempa import setup_gempa_command
-        from commands.setchannel import setup_setchannel_command
-        from commands.setmagnitude import setup_setmagnitude_command
-        from commands.setwilayah import setup_setwilayah_command
-        from commands.detail import setup_detail_command
-        from commands.peta import setup_peta_command
-        from commands.setwhere import setup_setwhere_command
-        from commands.stats import setup_stats_command
-
         try:
             # Hapus semua command lama (global + semua guild)
             self.tree.clear_commands(guild=None)
@@ -76,24 +64,12 @@ class EarthquakeBot(discord.Client):
 
             # Daftar command per guild
             for guild in self.guilds:
-                try:
-                    g = discord.Object(id=guild.id)
-                    await setup_help_command(self.tree, g)
-                    await setup_gempa_command(self.tree, g)
-                    await setup_setchannel_command(self.tree, g)
-                    await setup_setmagnitude_command(self.tree, g)
-                    await setup_setwilayah_command(self.tree, g)
-                    await setup_detail_command(self.tree, g)
-                    await setup_peta_command(self.tree, g)
-                    await setup_setwhere_command(self.tree, g)
-                    await setup_stats_command(self.tree, g)
-                    await self.tree.sync(guild=g)
-                    logger.info("Commands synced for guild %s", guild.name)
-                except Exception as guild_err:
-                    logger.error("Gagal sync guild %s: %s", guild.id, guild_err)
+                await self._sync_guild(discord.Object(id=guild.id))
 
             # Juga sync global (untuk DM /help & /gempa)
             try:
+                from commands.help import setup_help_command
+                from commands.gempa import setup_gempa_command
                 await setup_help_command(self.tree)
                 await setup_gempa_command(self.tree)
                 await self.tree.sync()
@@ -103,6 +79,33 @@ class EarthquakeBot(discord.Client):
             logger.info("Semua slash commands berhasil di-sync")
         except Exception as e:
             logger.error("Gagal register commands: %s", e)
+
+    async def _sync_guild(self, g: discord.Object):
+        """Daftar & sync slash commands untuk satu guild."""
+        from commands.help import setup_help_command
+        from commands.gempa import setup_gempa_command
+        from commands.setchannel import setup_setchannel_command
+        from commands.setmagnitude import setup_setmagnitude_command
+        from commands.setwilayah import setup_setwilayah_command
+        from commands.detail import setup_detail_command
+        from commands.peta import setup_peta_command
+        from commands.setwhere import setup_setwhere_command
+        from commands.stats import setup_stats_command
+
+        try:
+            await setup_help_command(self.tree, g)
+            await setup_gempa_command(self.tree, g)
+            await setup_setchannel_command(self.tree, g)
+            await setup_setmagnitude_command(self.tree, g)
+            await setup_setwilayah_command(self.tree, g)
+            await setup_detail_command(self.tree, g)
+            await setup_peta_command(self.tree, g)
+            await setup_setwhere_command(self.tree, g)
+            await setup_stats_command(self.tree, g)
+            await self.tree.sync(guild=g)
+            logger.info("Commands synced for guild %s", g.id)
+        except Exception as guild_err:
+            logger.error("Gagal sync guild %s: %s", g.id, guild_err)
 
     def setup_scheduler(self):
         """Setup APScheduler untuk cek gempa berkala"""
@@ -147,24 +150,7 @@ class EarthquakeBot(discord.Client):
         try:
             g = discord.Object(id=guild.id)
             self.tree.clear_commands(guild=g)
-            from commands.help import setup_help_command
-            from commands.gempa import setup_gempa_command
-            from commands.setchannel import setup_setchannel_command
-            from commands.setmagnitude import setup_setmagnitude_command
-            from commands.setwilayah import setup_setwilayah_command
-            from commands.detail import setup_detail_command
-            from commands.peta import setup_peta_command
-            from commands.setwhere import setup_setwhere_command
-            from commands.stats import setup_stats_command
-            await setup_help_command(self.tree, g)
-            await setup_gempa_command(self.tree, g)
-            await setup_setchannel_command(self.tree, g)
-            await setup_setmagnitude_command(self.tree, g)
-            await setup_setwilayah_command(self.tree, g)
-            await setup_detail_command(self.tree, g)
-            await setup_peta_command(self.tree, g)
-            await setup_setwhere_command(self.tree, g)
-            await setup_stats_command(self.tree, g)
+            await self._sync_guild(g)
             await self.tree.sync(guild=g)
             logger.info("Commands synced for new guild %s", guild.id)
         except Exception as e:
