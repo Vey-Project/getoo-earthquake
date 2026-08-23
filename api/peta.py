@@ -25,7 +25,7 @@ async def generate_map(latitude: float, longitude: float,
         return None
 
     # Marker pin merah di lokasi gempa
-    marker = f"pin-l+%23e74c3c({longitude},{latitude})"
+    marker = f"pin-l+e74c3c({longitude},{latitude})"
     url = f"{MAPBOX_STATIC_URL}/{marker}/{longitude},{latitude},{zoom}/{width}x{height}?access_token={MAPBOX_TOKEN}"
 
     try:

@@ -91,6 +91,7 @@ class EarthquakeBot(discord.Client):
         from commands.peta import setup_peta_command
         from commands.setwhere import setup_setwhere_command
         from commands.stats import setup_stats_command
+        from commands.unsetchannel import setup_unsetchannel_command
 
         try:
             await setup_help_command(self.tree, g)
@@ -102,6 +103,7 @@ class EarthquakeBot(discord.Client):
             await setup_peta_command(self.tree, g)
             await setup_setwhere_command(self.tree, g)
             await setup_stats_command(self.tree, g)
+            await setup_unsetchannel_command(self.tree, g)
             await self.tree.sync(guild=g)
             logger.info("Commands synced for guild %s", g.id)
         except Exception as guild_err:
