@@ -29,10 +29,11 @@ async def setup_detail_command(tree: app_commands.CommandTree, guild=None):
             import aiohttp
             async with aiohttp.ClientSession() as session:
                 earthquakes = await gempa_api.fetch_usgs(session)
+                earthquakes.extend(await gempa_api.fetch_bmkg(session))
 
             eq = None
             for e in earthquakes:
-                if e.get("id") and earthquake_id in e["id"]:
+                if e.get("id") and earthquake_id.lower() in e["id"].lower():
                     eq = e
                     break
 

@@ -1,4 +1,3 @@
-![](https://images5.alphacoders.com/119/thumb-1920-1198137.jpg)
 # 🤖 Bot Notifikasi Gempa Discord
 
 Bot otomatis 24/7 yang memantau gempa dari **USGS** (global) & **BMKG** (Indonesia), lalu mengirim notifikasi real-time ke channel Discord.
@@ -7,33 +6,50 @@ Bot otomatis 24/7 yang memantau gempa dari **USGS** (global) & **BMKG** (Indones
 
 | Fitur | Status |
 |-------|--------|
-| Notifikasi otomatis (scheduler) | ✅ |
-| Sumber data: USGS (global) + BMKG (Indonesia), fetch paralel | ✅ |
-| Filter magnitudo per server | ✅ |
-| Filter wilayah (opsional) | ✅ |
-| Anti-duplikat (SQLite, `UNIQUE(earthquake_id, source)`) | ✅ |
-| Gambar peta lokasi (Mapbox Static) | ✅ |
-| Slash commands lengkap | ✅ |
-| Multi-server | ✅ |
-| Auto-pruning log (>90 hari) | ✅ |
-| Logging harian | ✅ |
-
-> 🔒 Command `/setchannel`, `/setmagnitude`, `/setwilayah`, `/unsetchannel` hanya untuk user dengan izin **Manage Server**.
+| ✅ Notifikasi otomatis tanpa diminta | ✅ |
+| ✅ Sumber data: USGS (global) + BMKG (Indonesia) | ✅ |
+| ✅ Filter magnitudo (bisa diatur per server) | ✅ |
+| ✅ Filter wilayah (opsional) | ✅ |
+| ✅ Anti-duplikat | ✅ |
+| ✅ Gambar peta lokasi (Mapbox) | ✅ |
+| ✅ Slash commands lengkap | ✅ |
+| ✅ Multi-server | ✅ |
+| ✅ Logging harian | ✅ |
+| ✅ Siap deploy ke Railway/Fly.io | ✅ |
 
 ## 🚀 Cara Install & Jalankan
 
+### 1. Clone / Download
+```bash
+cd bot-gempa
+```
+
+### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # isi DISCORD_TOKEN
+```
+
+### 3. Setup Environment
+```bash
+cp .env.example .env
+```
+Edit `.env`:
+```
+DISCORD_TOKEN=token_bot_kamu_disini
+MAPBOX_TOKEN=token_mapbox_kamu_disini
+```
+
+### 4. Jalankan
+```bash
 python main.py
 ```
 
-## 🔑 Dapatkan Token
+## 🆕 Dapatkan Token
 
 ### Discord Bot Token
 1. Buka [Discord Developer Portal](https://discord.com/developers/applications)
 2. **New Application** → isi nama
-3. **Bot** → **Reset Token** → copy token
+3. **Bot** → **Add Bot** → **Reset Token** → copy token
 4. **OAuth2 > URL Generator**:
    - Scopes: `bot` `applications.commands`
    - Permissions: `Send Messages` `Embed Links` `Attach Files` `Read Message History`
@@ -48,68 +64,66 @@ python main.py
 
 | Perintah | Fungsi |
 |----------|--------|
-| `/gempa` | Lihat gempa terbaru |
-| `/peta <id>` | Peta lokasi gempa |
+| `/gempa` | Lihat 5 gempa terbaru (pilih untuk detail) |
+| `/setchannel #channel` | Atur channel notifikasi |
+| `/setmagnitude 5.0` | Atur magnitudo minimal |
+| `/setwilayah Sukabumi` | Filter wilayah (ketik 'semua' untuk reset) |
 | `/detail <id>` | Detail gempa spesifik |
-| `/setchannel <channel>` | Atur channel notifikasi *(admin)* |
-| `/setmagnitude <nilai>` | Atur magnitudo minimal *(admin)* |
-| `/setwilayah <wilayah>` | Filter wilayah, ketik `semua` untuk reset *(admin)* |
-| `/unsetchannel` | Matikan notifikasi server ini *(admin)* |
-| `/setwhere` | Lihat konfigurasi server saat ini |
-| `/stats` | Statistik gempa minggu ini |
 | `/help` | Panduan lengkap |
 
 ## 🏗️ Struktur Proyek
 
 ```
-getoo-earthquake/
+bot-gempa/
 ├── main.py                 # Entry point
-├── config.py               # Konfigurasi (.env)
-├── requirements.txt        # Dependencies (pinned)
-├── test_bot.py             # Smoke test (python test_bot.py)
+├── config.py               # Konfigurasi
+├── .env                    # Token & secrets
+├── requirements.txt        # Python dependencies
 ├── api/
-│   ├── gempa.py            # Fetch USGS & BMKG (paralel)
+│   ├── gempa.py            # Fetch USGS & BMKG
 │   └── peta.py             # Generate peta Mapbox
 ├── commands/
 │   ├── gempa.py            # /gempa
-│   ├── peta.py             # /peta
+│   ├── setchannel.py       # /setchannel
+│   ├── setmagnitude.py     # /setmagnitude
+│   ├── setwilayah.py       # /setwilayah
 │   ├── detail.py           # /detail
-│   ├── stats.py            # /stats
-│   ├── help.py             # /help
-│   ├── setwhere.py         # /setwhere
-│   ├── setchannel.py       # /setchannel      (admin)
-│   ├── setmagnitude.py     # /setmagnitude    (admin)
-│   ├── setwilayah.py       # /setwilayah      (admin)
-│   └── unsetchannel.py     # /unsetchannel    (admin)
+│   └── help.py             # /help
 ├── scheduler/
-│   └── notifikasi.py       # Notifikasi otomatis + pruning log
+│   └── notifikasi.py       # Notifikasi otomatis
 ├── database/
-│   ├── connection.py       # Koneksi & schema SQLite
+│   ├── connection.py       # Koneksi SQLite
 │   └── queries.py          # Query CRUD
-├── lib/
+├── utils/
 │   ├── embed.py            # Format embed Discord
-│   └── logger.py           # Logging harian
+│   └── logger.py           # Logging
 └── data/
-    └── bot.db              # SQLite (auto-generated)
+    └── bot.db              # SQLite database (auto-generated)
 ```
 
-## 🚂 Deploy ke Railway
+## 🚀 Deploy ke Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template?template=https://github.com/yourusername/bot-gempa)
+
+Atau manual:
 
 ```bash
+# Install Railway CLI
 npm i -g @railway/cli
+
+# Login
 railway login
+
+# Init project
 railway init
-railway variables --set "DISCORD_TOKEN=xxx MAPBOX_TOKEN=xxx"
+
+# Set environment variables
+railway env set DISCORD_TOKEN=your_token
+railway env set MAPBOX_TOKEN=your_token
+
+# Deploy
 railway up
 ```
-
-### ⚠️ Wajib: pasang Volume
-
-Filesystem container Railway **ephemeral** — tanpa volume, `data/bot.db` hilang tiap redeploy dan riwayat anti-duplikat ikut hilang (notifikasi bisa terkirim ulang).
-
-1. Dashboard project → **Settings** → **Volumes** → **New Volume**
-2. Mount point: `/app/data`
-3. Redeploy
 
 ## ⚙️ Konfigurasi `.env`
 
@@ -124,16 +138,22 @@ Filesystem container Railway **ephemeral** — tanpa volume, `data/bot.db` hilan
 
 ## 🐳 Docker (Alternatif)
 
-```bash
-docker compose up -d --build
-```
-
-## 🧪 Test
-
-```bash
-python test_bot.py
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+CMD ["python", "main.py"]
 ```
 
 ## 📊 Logging
 
 Log tersimpan di `logs/bot-YYYY-MM-DD.log` (rotasi harian).
+
+## 📄 Lisensi
+
+MIT
+
+---
+
+**Dibuat dengan ❤️ untuk komunitas Indonesia**

@@ -1,7 +1,6 @@
 """
 api/gempa.py - Fetch data gempa dari USGS dan BMKG
 """
-import asyncio
 import logging
 import aiohttp
 
@@ -66,6 +65,13 @@ async def fetch_bmkg(session: aiohttp.ClientSession) -> list:
         tsunami = gempa.get("Potensi", "")
         tsunami_flag = 1 if tsunami and "tsunami" in tsunami.lower() else 0
 
+        # Normalize depth to float km
+        depth_raw = gempa.get("Kedalaman", "0 km")
+        if isinstance(depth_raw, str):
+            depth_val = float(depth_raw.replace("km", "").strip())
+        else:
+            depth_val = float(depth_raw)
+
         return [{
             "id": eq_id,
             "source": "bmkg",
@@ -73,7 +79,7 @@ async def fetch_bmkg(session: aiohttp.ClientSession) -> list:
             "location": gempa.get("Wilayah", "Unknown"),
             "latitude": lat,
             "longitude": lon,
-            "depth": gempa.get("Kedalaman", "0 km"),
+            "depth": depth_val,
             "time": gempa.get("DateTime", ""),
             "tsunami": tsunami_flag,
             "url": "https://bmkg.go.id/gempabumi/",
@@ -84,8 +90,7 @@ async def fetch_bmkg(session: aiohttp.ClientSession) -> list:
 
 
 async def fetch_all(session: aiohttp.ClientSession) -> list:
-    """Fetch dari semua sumber (paralel)"""
-    usgs, bmkg = await asyncio.gather(
-        fetch_usgs(session), fetch_bmkg(session)
-    )
+    """Fetch dari semua sumber"""
+    usgs = await fetch_usgs(session)
+    bmkg = await fetch_bmkg(session)
     return usgs + bmkg

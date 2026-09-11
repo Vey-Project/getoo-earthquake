@@ -76,34 +76,10 @@ def get_all_active_servers():
     """Dapatkan semua server yang aktif (punya channel)"""
     conn = get_connection()
     cursor = conn.cursor()
-    # '' bisa masuk lewat insert set_magnitude/setwilayah sebelum setchannel
     cursor.execute("SELECT * FROM server_config WHERE channel_id IS NOT NULL AND channel_id != ''")
     rows = cursor.fetchall()
     conn.close()
     return [dict(r) for r in rows]
-
-
-def delete_server_config(server_id: str):
-    """Hapus konfigurasi server (matikan notifikasi)"""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM server_config WHERE server_id = ?", (server_id,))
-    conn.commit()
-    conn.close()
-
-
-def prune_old_logs(days: int = 90):
-    """Hapus log gempa lebih tua dari N hari"""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "DELETE FROM earthquake_log WHERE sent_at < datetime('now', ?)",
-        (f"-{days} days",)
-    )
-    deleted = cursor.rowcount
-    conn.commit()
-    conn.close()
-    return deleted
 
 
 # ============ EARTHQUAKE LOG ============
@@ -170,5 +146,14 @@ def log_tsunami(earthquake_id: str, source: str, message: str):
         INSERT OR IGNORE INTO tsunami_log (earthquake_id, source, message)
         VALUES (?, ?, ?)
     """, (earthquake_id, source, message))
+    conn.commit()
+    conn.close()
+
+
+def delete_server_config(server_id: str):
+    """Hapus konfigurasi server"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM server_config WHERE server_id = ?", (server_id,))
     conn.commit()
     conn.close()

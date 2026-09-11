@@ -20,18 +20,10 @@ async def setup_setmagnitude_command(tree: app_commands.CommandTree, guild=None)
         description="📏 Atur magnitudo minimal untuk notifikasi (default 4.5)",
         guild=guild
     )
-    @app_commands.default_permissions(manage_guild=True)
     @app_commands.describe(magnitude="Nilai magnitudo minimal (contoh: 5.0)")
     async def setmagnitude_slash(interaction: discord.Interaction, magnitude: app_commands.Range[float, 0.0, 10.0]):
         if not interaction.guild:
             await interaction.response.send_message("❌ Perintah ini hanya bisa di server.", ephemeral=True)
-            return
-
-        if not interaction.permissions.manage_guild:
-            await interaction.response.send_message(
-                "❌ Perintah ini khusus admin (butuh izin **Manage Server**).",
-                ephemeral=True
-            )
             return
 
         set_server_magnitude(str(interaction.guild_id), magnitude)

@@ -11,7 +11,8 @@ import discord
 from api.gempa import fetch_all
 from api.peta import generate_map
 from database.queries import (
-    get_all_active_servers, is_earthquake_sent, log_earthquake, prune_old_logs
+    get_all_active_servers, is_earthquake_sent, log_earthquake,
+    is_tsunami_sent, log_tsunami
 )
 from lib.embed import build_earthquake_embed, humanize_time
 
@@ -21,14 +22,6 @@ logger = logging.getLogger(__name__)
 async def check_and_notify(bot: discord.Client):
     """Cek gempa baru dan kirim notifikasi ke semua server"""
     logger.info("Memeriksa gempa baru...")
-
-    # Pruning log anti-duplikat (>90 hari) — murah, sekali per tick
-    try:
-        pruned = prune_old_logs(90)
-        if pruned:
-            logger.info("Pruned %s log gempa >90 hari", pruned)
-    except Exception as e:
-        logger.warning("Gagal pruning log: %s", e)
 
     async with aiohttp.ClientSession() as session:
         earthquakes = await fetch_all(session)

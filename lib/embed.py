@@ -35,11 +35,9 @@ def humanize_time(ts: Optional[str]) -> str:
     """Format waktu ke WIB (UTC+7)"""
     try:
         if isinstance(ts, (int, float)):
-            dt = datetime.datetime.fromtimestamp(ts / 1000, tz=datetime.timezone.utc)
+            dt = datetime.datetime.utcfromtimestamp(ts / 1000)
         else:
-            # BMKG format: "11-Aug-26 14:32:10 WIB" — sudah WIB, tampilkan apa adanya
-            if ts and "WIB" in ts:
-                return ts
+            # BMKG format: "11-Aug-26 14:32:10 WIB" atau ISO
             dt = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
         dt = dt + datetime.timedelta(hours=7)  # UTC → WIB
         return dt.strftime("%d-%b-%Y %H:%M:%S WIB")
@@ -56,7 +54,7 @@ def build_earthquake_embed(eq: dict) -> discord.Embed:
         title=f"{format_magnitudo_badge(mag)} GEMPA BUMI MAGNITUDO {mag}",
         description=f"🔔 **Sumber: {source}**",
         color=magnitudo_color(mag),
-        timestamp=datetime.datetime.now(datetime.timezone.utc)
+        timestamp=datetime.datetime.utcnow()
     )
 
     embed.add_field(name="📍 Lokasi", value=eq.get("location", "Unknown"), inline=False)
@@ -66,11 +64,12 @@ def build_earthquake_embed(eq: dict) -> discord.Embed:
     embed.add_field(name="🗺️ Koordinat", value=coord_text, inline=True)
 
     depth = eq.get("depth", 0)
-    if isinstance(depth, str):
-        depth_clean = depth.replace("km", "").strip()
-    else:
-        depth_clean = depth
-    embed.add_field(name="📏 Kedalaman", value=f"{depth_clean} km", inline=True)
+    if not isinstance(depth, (int, float)):
+        try:
+            depth = float(str(depth).replace("km", "").strip())
+        except Exception:
+            depth = 0
+    embed.add_field(name="📏 Kedalaman", value=f"{depth} km", inline=True)
 
     embed.add_field(name="🕐 Waktu", value=humanize_time(eq.get("time")), inline=False)
 
@@ -100,12 +99,14 @@ def build_help_embed() -> discord.Embed:
 
     commands = [
         ("/gempa", "Lihat daftar gempa terbaru"),
-        ("/peta <id>", "Lihat peta lokasi gempa"),
-        ("/detail <id>", "Lihat detail gempa spesifik"),
         ("/setchannel <channel>", "Atur channel tujuan notifikasi"),
         ("/setmagnitude <nilai>", "Atur magnitudo minimal (default 4.5)"),
-        ("/setwilayah <wilayah>", "Filter notifikasi per wilayah"),
-        ("/setwhere", "Lihat konfigurasi server saat ini"),
+        ("/setwilayah <wilayah>", "Filter notifikasi per wilayah (opsional)"),
+        ("/detail <id>", "Lihat detail gempa spesifik"),
+        ("/peta <id>", "Lihat peta lokasi gempa"),
+        ("/stats", "Statistik gempa minggu ini"),
+        ("/setwhere", "Lihat konfigurasi server"),
+        ("/unsetchannel", "Matikan notifikasi server"),
         ("/help", "Tampilkan panduan ini"),
     ]
 

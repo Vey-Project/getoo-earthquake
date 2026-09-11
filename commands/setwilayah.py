@@ -20,18 +20,10 @@ async def setup_setwilayah_command(tree: app_commands.CommandTree, guild=None):
         description="📍 Filter notifikasi hanya untuk wilayah tertentu (ketik 'semua' untuk reset)",
         guild=guild
     )
-    @app_commands.default_permissions(manage_guild=True)
     @app_commands.describe(wilayah="Nama wilayah/kota (contoh: Sukabumi, atau 'semua' untuk reset)")
     async def setwilayah_slash(interaction: discord.Interaction, wilayah: str):
         if not interaction.guild:
             await interaction.response.send_message("❌ Perintah ini hanya bisa di server.", ephemeral=True)
-            return
-
-        if not interaction.permissions.manage_guild:
-            await interaction.response.send_message(
-                "❌ Perintah ini khusus admin (butuh izin **Manage Server**).",
-                ephemeral=True
-            )
             return
 
         if wilayah.lower() in ("semua", "all", "reset", "-"):
